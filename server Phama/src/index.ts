@@ -1,15 +1,26 @@
-import express from 'express'
-import authRoutes from './routes/auth'
+import express from 'express';
+import authRoutes from './routes/auth';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-const app = express()
-const port = 8080
+dotenv.config();
 
-// app.get('/', (req, res) => {
-//   res.send('Hellow World for Cheching')
-// })
+mongoose.connect(process.env.MONGO_URI as string)
+  .then(() => {
+    const app = express();
+    const port = 8080;
 
-app.use('/auth', authRoutes)
+    app.use(express.json());
+    app.use('/auth', authRoutes);
 
-app.listen(port, () => {
-  console.log(`server started on port ${port}`)
-})
+    console.log('connected to Mongodb');
+
+    app.listen(port, () => {
+      console.log(`server started on port ${port}`);
+    });
+
+  })
+  .catch((e) => {
+    throw new Error(e);
+  });
+
