@@ -1,6 +1,8 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import User from '../model/user';
+import bcrypt from 'bcryptjs';
+import JWT from 'jsonwebtoken';
 
 const routes = express.Router();
 
@@ -35,7 +37,24 @@ routes.post('/signup',
 
     }
 
-    res.json(user);
+    const hashedPassoword = await bcrypt.hash(password, 10);
+
+    const newUser = await User.create({
+      email,
+      password: hashedPassoword
+    });
+
+    const token = await JWT.sign({ email: newUser.email }, process.env.JWT_TOKEN as string, { expiresIn: 360000 });
+
+    res.json({
+      data: {
+        token,
+        user: {
+          email: newUser.email,
+          id: newUser._id,
+        }
+      }
+    });
   });
 
 export default routes;
