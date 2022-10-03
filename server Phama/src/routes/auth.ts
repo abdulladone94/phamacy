@@ -1,5 +1,6 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
+import User from '../model/user';
 
 const routes = express.Router();
 
@@ -18,7 +19,23 @@ routes.post('/signup',
     }
     const { email, password } = req.body;
 
-    res.json({ email, password });
+    // const user = await User.create({ email, password });
+
+    const user = await User.findOne({ email, data: null });
+
+    if (user) {
+      return res.json({
+        errors: [
+          {
+            msg: "Email already Exezist"
+          }
+        ],
+        data: null
+      });
+
+    }
+
+    res.json(user);
   });
 
 export default routes;
