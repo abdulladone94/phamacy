@@ -57,6 +57,47 @@ routes.post('/signup',
     });
   });
 
+
+routes.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.json({
+      errors: [{
+        msg: 'Invalid Email'
+      }],
+      data: null
+    });
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if (!isMatch) {
+    return res.json({
+      errors: [{
+        msg: 'Invalid Password'
+      }],
+      data: null
+    });
+  } else {
+    console.log("login success");
+  }
+
+  const token = await JWT.sign({ email }, process.env.JWT_TOKEN as string, { expiresIn: 360000 });
+
+  res.json({
+    errors: [],
+    data: {
+      token,
+      user: {
+        email: user.email,
+        id: user._id
+
+      }
+    }
+  });
+});
+
 export default routes;
 
 
